@@ -22,6 +22,11 @@ void MainWindow::searchConnectedDevice() {
         // no connected devices
         return;
     }
+    status = FT_SetVIDPID(0x0403, 0x6010);
+    if (status != FT_OK) {
+        QMessageBox::warning(this, "Cannot set VID, PID", "Cannot set VID, PID", QMessageBox::Ok);
+        return;
+    }
     if (numdevs > 0) {
         info = (FT_DEVICE_LIST_INFO_NODE*)malloc(sizeof(FT_DEVICE_LIST_INFO_NODE) * numdevs);
         status = FT_GetDeviceInfoList(info, &numdevs);
@@ -92,11 +97,26 @@ void MainWindow::sendLoopback() {
             return;
         }
     }
+    QThread::msleep(20);
     // read data back
     status = FT_GetStatus(ftHandle, &rxBytes, &txBytes, &events);
     if (status == FT_OK && rxBytes > 0) {
         status = FT_Read(ftHandle, rxBuffer, rxBytes, &read);
         if (status == FT_OK && read == rxBytes) {
+            if (read != FT_BUFFER_SIZE) {
+                QMessageBox::information(this, "Not enough data", "Not enought data", QMessageBox::Ok);
+                return;
+            }
+            for (int i = 0; i < FT_BUFFER_SIZE; ++i) {
+                if (rxBuffer[i] != char(i % 256)) {
+                    QMessageBox::information(this,
+                                             QString::asprintf("Unexpected data in pos %d\n", i),
+                                             QString::asprintf("Unexpected data in pos %d\n", i),
+                                             QMessageBox::Ok);
+                    break;
+                }
+            }
+        } else {
 
         }
     }
