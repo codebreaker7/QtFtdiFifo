@@ -3,12 +3,11 @@
 
 #include <QMainWindow>
 #include "ftd2xx.h"
+#include "ftdicontrol.h"
 
 namespace Ui {
 class MainWindow;
 }
-
-#define FT_BUFFER_SIZE 4096
 
 class MainWindow : public QMainWindow
 {
@@ -23,12 +22,12 @@ public slots:
     void sendDataFromFile();
     void sendLoopback();
     void searchAndOpenDevice();
-private:
-    Ui::MainWindow *ui;
-    FT_HANDLE ftHandle;
 
-    void searchConnectedDevice();
-    void setupFifoMode();
+    void reportError();
+    void reportSuccess();
+private:
+    FtdiControl * control;
+    Ui::MainWindow *ui;
 };
 
 #endif // MAINWINDOW_H

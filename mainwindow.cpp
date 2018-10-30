@@ -9,116 +9,36 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-}
-
-void MainWindow::searchConnectedDevice() {
-    FT_STATUS status;
-    FT_DEVICE_LIST_INFO_NODE * info;
-    DWORD numdevs;
-    status = FT_CreateDeviceInfoList(&numdevs);
-    if (status == FT_OK && numdevs > 0) {
-        // some devices have been found
-    } else {
-        // no connected devices
-        return;
-    }
-    status = FT_SetVIDPID(0x0403, 0x6010);
-    if (status != FT_OK) {
-        QMessageBox::warning(this, "Cannot set VID, PID", "Cannot set VID, PID", QMessageBox::Ok);
-        return;
-    }
-    if (numdevs > 0) {
-        info = (FT_DEVICE_LIST_INFO_NODE*)malloc(sizeof(FT_DEVICE_LIST_INFO_NODE) * numdevs);
-        status = FT_GetDeviceInfoList(info, &numdevs);
-        if (status == FT_OK) {
-            // try to open first device in the list
-            //status = FT_OpenEx((*info).SerialNumber, FT_OPEN_BY_SERIAL_NUMBER, &ftHandle); -- no description available
-            status = FT_Open(0, &ftHandle);
-            if (status != FT_OK) {
-                // cannot open specified device
-                QMessageBox::information(this, "Cannot open device", "Cannot open device", QMessageBox::Ok);
-                return;
-            }
-        }
-    }
-}
-
-void MainWindow::setupFifoMode() {
-    FT_STATUS status;
-    UCHAR mask = 0xff;
-    UCHAR mode;
-
-    mode = 0x00;
-    status = FT_SetBitMode(ftHandle, mask, mode);
-    QThread::msleep(10);
-    mode = 0x40;
-    status |= FT_SetBitMode(ftHandle, mask, mode);
-    if (status != FT_OK) {
-        // cannot set bit mode
-    }
-
-    status = FT_SetLatencyTimer(ftHandle, 2);
-    status |= FT_SetUSBParameters(ftHandle, 0x10000, 0x10000);
-    status |= FT_SetFlowControl(ftHandle, FT_FLOW_RTS_CTS, 0x0, 0x0);
-    status |= FT_Purge(ftHandle, FT_PURGE_RX);
-    status |= FT_Purge(ftHandle, FT_PURGE_TX);
-
-    if (status != FT_OK) {
-        // cannot set parameters
-    }
-
+    control = new FtdiControl(this);
+    connect(control, &FtdiControl::errorHappened, this, &MainWindow::reportError);
+    connect(control, &FtdiControl::loopbackSuccessful, this, &MainWindow::reportSuccess);
 }
 
 void MainWindow::searchAndOpenDevice() {
-    searchConnectedDevice();
-    setupFifoMode();
+      if (control->openDevice() != 0) {
+          QMessageBox::information(this, "FTDI", "Cannot open device", QMessageBox::Ok);
+          return;
+      }
+      if (control->goToFifoMode() != 0) {
+          QMessageBox::information(this, "FTDI", "Cannot set FIFO mode", QMessageBox::Ok);
+      }
 }
 
 void MainWindow::sendDataFromFile() {
 
 }
 
+void MainWindow::reportError() {
+    QMessageBox::information(this, "Error from FTDI", "Error happened", QMessageBox::Ok);
+}
+
+void MainWindow::reportSuccess() {
+    QMessageBox::information(this, "Loopback", "Loopback transmission is successful", QMessageBox::Ok);
+}
+
 void MainWindow::sendLoopback() {
-    FT_STATUS status;
-    DWORD rxBytes, txBytes, events, written, read;
-    char txBuffer[FT_BUFFER_SIZE];
-    char rxBuffer[FT_BUFFER_SIZE];
-    // init array with test data
-    for (int i = 0; i < FT_BUFFER_SIZE; ++i) {
-        txBuffer[i] = i % 256;
-    }
-    // first try to send
-    status = FT_GetStatus(ftHandle, &rxBytes, &txBytes, &events);
-    if (status == FT_OK && txBytes == 0) {
-        status = FT_Write(ftHandle, txBuffer, FT_BUFFER_SIZE, &written);
-        if (status == FT_OK && written == FT_BUFFER_SIZE) {
-
-        } else {
-            return;
-        }
-    }
-    QThread::msleep(20);
-    // read data back
-    status = FT_GetStatus(ftHandle, &rxBytes, &txBytes, &events);
-    if (status == FT_OK && rxBytes > 0) {
-        status = FT_Read(ftHandle, rxBuffer, rxBytes, &read);
-        if (status == FT_OK && read == rxBytes) {
-            if (read != FT_BUFFER_SIZE) {
-                QMessageBox::information(this, "Not enough data", "Not enought data", QMessageBox::Ok);
-                return;
-            }
-            for (int i = 0; i < FT_BUFFER_SIZE; ++i) {
-                if (rxBuffer[i] != char(i % 256)) {
-                    QMessageBox::information(this,
-                                             QString::asprintf("Unexpected data in pos %d\n", i),
-                                             QString::asprintf("Unexpected data in pos %d\n", i),
-                                             QMessageBox::Ok);
-                    break;
-                }
-            }
-        } else {
-
-        }
+    if (control->isOpened()) {
+        control->sendDataLoopback();
     }
 }
 
