@@ -24,10 +24,6 @@ void MainWindow::searchAndOpenDevice() {
       }
 }
 
-void MainWindow::sendDataFromFile() {
-
-}
-
 void MainWindow::reportError() {
     QMessageBox::information(this, "Error from FTDI", "Error happened", QMessageBox::Ok);
 }
@@ -51,6 +47,12 @@ void MainWindow::selectFileToSend() {
         fileNames = fileDialog.selectedFiles();
         QString selectedFileName = fileNames.first();
         ui->sendFileNameEdit->setText(selectedFileName);
+    }
+}
+
+void MainWindow::sendDataFromFile() {
+    if (control->isOpened() && ui->sendFileButton->text().length() != 0) {
+        control->sendDataFromFile(ui->sendFileNameEdit->text());
     }
 }
 

@@ -2,6 +2,7 @@
 
 #include <QThread>
 #include <QMessageBox>
+#include <QFile>
 
 FtdiControl::FtdiControl(QObject *parent) : QObject(parent)
 {
@@ -15,12 +16,10 @@ int FtdiControl::openDevice() {
     status = FT_CreateDeviceInfoList(&numdevs);
     if (status != FT_OK || numdevs == 0) {
         // no connected devices
-        //QMessageBox::information(this, "FTDI", "No connected devices", QMessageBox::Ok);
-        return 1;
+        return status;
     }
     status = FT_SetVIDPID(0x0403, 0x6010); // this operation is not necessary with root access and can be omitted further
     if (status != FT_OK) {
-        //QMessageBox::warning(this, "Cannot set VID, PID", "Cannot set VID, PID", QMessageBox::Ok);
         return status;
     }
     if (numdevs > 0) {
@@ -31,7 +30,6 @@ int FtdiControl::openDevice() {
             status = FT_Open(0, &ftHandle);
             if (status != FT_OK) {
                 // cannot open specified device
-                //QMessageBox::information(this, "Cannot open device", "Cannot open device", QMessageBox::Ok);
                 return status;
             }
         }
@@ -71,7 +69,7 @@ int FtdiControl::goToFifoMode() {
 void FtdiControl::sendDataLoopback() {
     FT_STATUS status;
     DWORD rxBytes, txBytes, events, written, read;
-    char txBuffer[FT_BUFFER_SIZE]; // actual sizef of data buffer could be changed according to the buffer from the other communication side
+    char txBuffer[FT_BUFFER_SIZE]; // actual size of data buffer could be changed according to the buffer from the other communication side
     char rxBuffer[FT_BUFFER_SIZE];
     // init array with test data
     for (int i = 0; i < FT_BUFFER_SIZE; ++i) {
@@ -95,16 +93,11 @@ void FtdiControl::sendDataLoopback() {
         status = FT_Read(ftHandle, rxBuffer, rxBytes, &read);
         if (status == FT_OK && read == rxBytes) {
             if (read != FT_BUFFER_SIZE) {
-                //QMessageBox::information(this, "Not enough data", "Not enought data", QMessageBox::Ok);
                 return;
             }
             for (int i = 0; i < FT_BUFFER_SIZE; ++i) {
                 if (rxBuffer[i] != char(i % 256)) {
                     emit errorHappened();
-//                    QMessageBox::information(this,
-//                                             QString::asprintf("Unexpected data in pos %d\n", i),
-//                                             QString::asprintf("Unexpected data in pos %d\n", i),
-//                                             QMessageBox::Ok);
                     break;
                 }
             }
@@ -113,6 +106,25 @@ void FtdiControl::sendDataLoopback() {
         }
     }
     emit loopbackSuccessful();
+}
+
+void FtdiControl::sendDataFromFile(const QString & filename) {
+    QFile file(filename);
+    qint64 read;
+    DWORD written;
+    FT_STATUS status;
+    if (file.exists()) {
+        file.open(QFile::ReadOnly);
+        char txBuffer[FT_BUFFER_SIZE];
+        read = file.read(txBuffer, FT_BUFFER_SIZE);
+        while (read > 0) {
+            status = FT_Write(ftHandle, txBuffer, read, &written);
+            if (status != FT_OK || written != read) {
+                break;
+            }
+            read = file.read(txBuffer, FT_BUFFER_SIZE);
+        }
+    }
 }
 
 bool FtdiControl::isOpened() const {

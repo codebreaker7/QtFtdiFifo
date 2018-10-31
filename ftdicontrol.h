@@ -25,7 +25,7 @@ public:
     int goToFifoMode();
     void sendDataLoopback();
     bool isOpened() const;
-    void sendDataFromFile();
+    void sendDataFromFile(const QString&);
 };
 
 #endif // FTDICONTROL_H
