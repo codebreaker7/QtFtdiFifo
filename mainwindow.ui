@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>300</height>
+    <height>355</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -74,6 +74,34 @@
         </item>
        </layout>
       </item>
+      <item>
+       <layout class="QGridLayout" name="gridLayout_2">
+        <item row="0" column="1">
+         <widget class="QLineEdit" name="receiveFileNameEdit"/>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_2">
+          <property name="text">
+           <string>File to write</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QPushButton" name="selectReceiveFileButton">
+          <property name="text">
+           <string>Select</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QPushButton" name="receiveInFileButton">
+          <property name="text">
+           <string>Receive data</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
      </layout>
     </item>
    </layout>
@@ -109,7 +137,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>388</x>
-     <y>228</y>
+     <y>216</y>
     </hint>
     <hint type="destinationlabel">
      <x>79</x>
@@ -124,8 +152,8 @@
    <slot>sendLoopback()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>271</x>
-     <y>170</y>
+     <x>282</x>
+     <y>163</y>
     </hint>
     <hint type="destinationlabel">
      <x>283</x>
@@ -140,8 +168,8 @@
    <slot>searchAndOpenDevice()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>155</x>
-     <y>95</y>
+     <x>166</x>
+     <y>92</y>
     </hint>
     <hint type="destinationlabel">
      <x>164</x>
@@ -156,12 +184,28 @@
    <slot>sendDataFromFile()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>225</x>
-     <y>257</y>
+     <x>297</x>
+     <y>249</y>
     </hint>
     <hint type="destinationlabel">
      <x>333</x>
      <y>250</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>selectReceiveFileButton</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>selectFileToReceive()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>372</x>
+     <y>275</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>370</x>
+     <y>295</y>
     </hint>
    </hints>
   </connection>
@@ -171,5 +215,6 @@
   <slot>sendLoopback()</slot>
   <slot>searchAndOpenDevice()</slot>
   <slot>sendDataFromFile()</slot>
+  <slot>selectFileToReceive()</slot>
  </slots>
 </ui>

@@ -40,13 +40,23 @@ void MainWindow::sendLoopback() {
 
 void MainWindow::selectFileToSend() {
     QFileDialog fileDialog(this);
-    fileDialog.setFileMode(QFileDialog::AnyFile);
+    fileDialog.setFileMode(QFileDialog::ExistingFile);
     fileDialog.setNameFilter(tr("Text files (*.txt)"));
     QStringList fileNames;
     if (fileDialog.exec()) {
         fileNames = fileDialog.selectedFiles();
         QString selectedFileName = fileNames.first();
         ui->sendFileNameEdit->setText(selectedFileName);
+    }
+}
+
+void MainWindow::selectFileToReceive() {
+    QFileDialog fileDialog(this);
+    fileDialog.setFileMode(QFileDialog::AnyFile);
+    fileDialog.setNameFilter(tr("Text files (*.txt)"));
+    if (fileDialog.exec()) {
+        QStringList fileNames = fileDialog.selectedFiles();
+        ui->receiveFileNameEdit->setText(fileNames.first());
     }
 }
 

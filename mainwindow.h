@@ -19,6 +19,7 @@ public:
 
 public slots:
     void selectFileToSend();
+    void selectFileToReceive();
     void sendDataFromFile();
     void sendLoopback();
     void searchAndOpenDevice();
