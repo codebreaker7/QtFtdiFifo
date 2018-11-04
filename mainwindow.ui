@@ -93,10 +93,27 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="1">
+        <item row="2" column="1">
          <widget class="QPushButton" name="receiveInFileButton">
           <property name="text">
            <string>Receive data</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QCheckBox" name="useDefSizeCheckBox">
+          <property name="text">
+           <string>Use default</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLineEdit" name="receiveDataSizeEdit">
+          <property name="enabled">
+           <bool>false</bool>
           </property>
          </widget>
         </item>
@@ -137,7 +154,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>388</x>
-     <y>216</y>
+     <y>187</y>
     </hint>
     <hint type="destinationlabel">
      <x>79</x>
@@ -152,8 +169,8 @@
    <slot>sendLoopback()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>282</x>
-     <y>163</y>
+     <x>293</x>
+     <y>141</y>
     </hint>
     <hint type="destinationlabel">
      <x>283</x>
@@ -168,8 +185,8 @@
    <slot>searchAndOpenDevice()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>166</x>
-     <y>92</y>
+     <x>177</x>
+     <y>85</y>
     </hint>
     <hint type="destinationlabel">
      <x>164</x>
@@ -185,7 +202,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>297</x>
-     <y>249</y>
+     <y>220</y>
     </hint>
     <hint type="destinationlabel">
      <x>333</x>
@@ -200,12 +217,44 @@
    <slot>selectFileToReceive()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>372</x>
-     <y>275</y>
+     <x>388</x>
+     <y>255</y>
     </hint>
     <hint type="destinationlabel">
      <x>370</x>
      <y>295</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>receiveInFileButton</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>receiveInFile()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>195</x>
+     <y>308</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>104</x>
+     <y>308</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>useDefSizeCheckBox</sender>
+   <signal>stateChanged(int)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>processSizeCheckBox(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>78</x>
+     <y>278</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>71</x>
+     <y>293</y>
     </hint>
    </hints>
   </connection>
@@ -216,5 +265,7 @@
   <slot>searchAndOpenDevice()</slot>
   <slot>sendDataFromFile()</slot>
   <slot>selectFileToReceive()</slot>
+  <slot>receiveInFile()</slot>
+  <slot>processSizeCheckBox(int)</slot>
  </slots>
 </ui>

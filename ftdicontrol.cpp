@@ -4,7 +4,7 @@
 #include <QMessageBox>
 #include <QFile>
 
-FtdiControl::FtdiControl(QObject *parent) : QObject(parent)
+FtdiControl::FtdiControl(QObject *parent) : QObject(parent), recPackSize(DEFAULT_REC_PACKAGE_SIZE)
 {
 
 }
@@ -125,6 +125,31 @@ void FtdiControl::sendDataFromFile(const QString & filename) {
             read = file.read(txBuffer, FT_BUFFER_SIZE);
         }
     }
+}
+
+void FtdiControl::receiveDataInFile(const QString & filename) {
+    QFile file(filename);
+    char rxBuffer[FT_MAX_BUFFER_SIZE];
+    DWORD read, tx, event;
+    DWORD toRead;
+    FT_STATUS status;
+
+    file.open(QFile::WriteOnly);
+    uint leftToReceive = recPackSize;
+    while (leftToReceive != 0) {
+        FT_GetStatus(ftHandle, &toRead, &tx, &event);
+        status = FT_Read(ftHandle, rxBuffer, toRead, &read);
+        if (status == FT_OK) {
+            file.write(rxBuffer, read);
+            leftToReceive -= read;
+        }
+    }
+    file.flush();
+    file.close();
+}
+
+void FtdiControl::setRecPackSize(uint newSize) {
+    recPackSize = newSize;
 }
 
 bool FtdiControl::isOpened() const {

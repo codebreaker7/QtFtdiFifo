@@ -22,7 +22,10 @@ public slots:
     void selectFileToReceive();
     void sendDataFromFile();
     void sendLoopback();
+    void receiveInFile();
     void searchAndOpenDevice();
+
+    void processSizeCheckBox(int);
 
     void reportError();
     void reportSuccess();

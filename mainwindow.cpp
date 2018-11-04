@@ -66,6 +66,34 @@ void MainWindow::sendDataFromFile() {
     }
 }
 
+void MainWindow::receiveInFile() {
+    if (control->isOpened()) {
+        if (ui->receiveFileNameEdit->text().isEmpty()) {
+            QMessageBox::information(this, "No file selected", "Select file to receive first!", QMessageBox::Ok);
+            return;
+        }
+        if (ui->useDefSizeCheckBox->isChecked()) {
+            control->setRecPackSize(FtdiControl::DEFAULT_REC_PACKAGE_SIZE);
+        } else {
+            uint newSize = ui->receiveDataSizeEdit->text().toUInt();
+            if (newSize < 0) {
+                QMessageBox::information(this, "Size error", "Cannot be negative", QMessageBox::Ok);
+                return;
+            }
+            control->setRecPackSize(newSize);
+        }
+        control->receiveDataInFile(ui->receiveFileNameEdit->text());
+    }
+}
+
+void MainWindow::processSizeCheckBox(int val) {
+    if (val == Qt::Unchecked) {
+        ui->receiveDataSizeEdit->setEnabled(true);
+    } else if (val == Qt::Checked) {
+        ui->receiveDataSizeEdit->setEnabled(false);
+    }
+}
+
 MainWindow::~MainWindow()
 {
     delete ui;
